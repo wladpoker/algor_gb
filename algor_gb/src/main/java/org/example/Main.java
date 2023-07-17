@@ -1,117 +1,108 @@
 package org.example;
-import java.util.Iterator;
+
+import java.util.Scanner;
+// Программа для реализации операции вставки в красно-черном дереве.
+
+
+class node {
+    node left, right;
+    int data;
+    boolean color;
+    node(int data) {
+        this.data = data;
+        left = null;
+        right = null;
+        color = true;
+    }
+}
 
 public class Main {
+    private static node root = null;
+    node rotateLeft(node myNode) {
+        System.out.printf("поворот влево!!\n");
+        node child = myNode.right;
+        node childLeft = child.left;
 
-    static class Contact {
+        child.left = myNode;
+        myNode.right = childLeft;
 
-        int id;
-        String name;
-        String phone;
+        return child;
+    }
+    node rotateRight(node myNode) {
+        System.out.printf("вращение вправо\n");
+        node child = myNode.left;
+        node childRight = child.right;
 
-        public Contact(int id, String name, String phone) {
-            this.id = id;
-            this.name = name;
-            this.phone = phone;
+        child.right = myNode;
+        myNode.left = childRight;
+
+        return child;
+    }
+    boolean isRed(node myNode) {
+        if (myNode == null) {
+            return false;
+        }
+        return (myNode.color == true);
+    }
+    void swapColors(node node1, node node2) {
+        boolean temp = node1.color;
+        node1.color = node2.color;
+        node2.color = temp;
+    }
+    node insert(node myNode, int data) {
+        if (myNode == null) {
+            return new node(data);
         }
 
-        @Override
-        public String toString() {
-            return "Contact{" +
-                    "id=" + id +
-                    ", name='" + name + '\'' +
-                    ", phone='" + phone + '\'' +
-                    '}';
+        if (data < myNode.data) {
+            myNode.left = insert(myNode.left, data);
+        } else if (data > myNode.data) {
+            myNode.right = insert(myNode.right, data);
+        } else {
+            return myNode;
         }
+
+        if (isRed(myNode.right) && !isRed(myNode.left)) {
+            myNode = rotateLeft(myNode);
+            swapColors(myNode, myNode.left);
+        }
+
+        if (isRed(myNode.left) && isRed(myNode.left.left)) {
+            myNode = rotateRight(myNode);
+            swapColors(myNode, myNode.right);
+        }
+
+        if (isRed(myNode.left) && isRed(myNode.right)) {
+            myNode.color = !myNode.color;
+            myNode.left.color = false;
+            myNode.right.color = false;
+        }
+
+        return myNode;
     }
 
-    public static class SingleLinkList<T> implements Iterable {
-
-        ListItem<T> head;
-        ListItem<T> tail;
-
-        @Override
-        public Iterator iterator() {
-            return new Iterator<T>() {
-                ListItem<T> current = head;
-
-                @Override
-                public boolean hasNext() {
-                    return current != null;
-                }
-
-                @Override
-                public T next() {
-                    T data = current.data;
-                    current = current.next;
-                    return data;
-                }
-            };
-        }
-
-        private static class ListItem<T> {
-
-            T data;
-            ListItem<T> next;
-        }
-
-        //Голова пустая
-        public boolean isEmpty() {
-            return head == null;
-        }
-
-        //заполнение списка
-        public void addToEnd(T item) {
-
-            //Выделение памяти для списка
-            ListItem<T> newItem = new ListItem<>();
-            newItem.data = item;
-
-            //Если, голова и хвост пустая
-            if (isEmpty()) {
-                head = newItem;
-                tail = newItem;
-            } else { //Если, не пустая то передаём элементу адрес и ставим в хвост
-                tail.next = newItem;
-                tail = newItem;
-            }
-        }
-
-        //метод разворота списка
-        public void reverse() {
-            if (!isEmpty() && head.next != null) {//Если голова не равна нулю
-                tail = head;
-                ListItem<T> current = head.next;
-                head.next = null;
-                while (current != null) {
-                    ListItem<T> next = current.next;
-                    current.next = head;
-                    head = current;
-                    current = next;
-                }
-            }
+    void inorder(node node) {
+        if (node != null)
+        {
+            inorder(node.left);
+            char c = '●';
+            if (node.color == false)
+                c = '◯';
+            System.out.print(node.data + ""+c+" ");
+            inorder(node.right);
         }
     }
-
     public static void main(String[] args) {
-        SingleLinkList<Contact> contactList = new SingleLinkList<>();
-
-        contactList.addToEnd(new Contact(121, "Иванов Иван Иванович", "+7987654321"));
-        contactList.addToEnd(new Contact(122, "Иванов Сергей Иванович", "+7987654322"));
-        contactList.addToEnd(new Contact(123, "Иванов Андрей Иванович", "+7987654323"));
-        contactList.addToEnd(new Contact(124, "Иванов Тимофей Иванович", "+7987654324"));
-        contactList.addToEnd(new Contact(125, "Иванов Александр Иванович", "+7987654325"));
-
-        for (Object contact : contactList) {
-            System.out.println(contact);
-        }
-        contactList.reverse();
-
-        System.out.println("-------------------------------------");
-
-        for (Object contact : contactList) {
-            System.out.println(contact);
-        }
+        Main node = new Main();
+        Scanner scan = new Scanner(System.in);
+        char ch;
+        do {
+            System.out.println("Введите целое число");
+            int num = scan.nextInt();
+            root = node.insert(root, num);
+            node.inorder(root);
+            System.out.println("\nВы хотите продолжить? (введите y или n)");
+            ch = scan.next().charAt(0);
+        } while (ch == 'Y' || ch == 'y');
     }
-
 }
