@@ -1,60 +1,117 @@
 package org.example;
-
-
+import java.util.Iterator;
 
 public class Main {
 
-    private static void heapify(int[] arr, int i, int n) {
-        int l = i * 2 + 1;
+    static class Contact {
 
-        int r = i * 2 + 2;
+        int id;
+        String name;
+        String phone;
 
-        int largest = i;
+        public Contact(int id, String name, String phone) {
+            this.id = id;
+            this.name = name;
+            this.phone = phone;
+        }
 
-        if(l < n && arr[l] > arr[largest])
-            largest = l;
-
-        if(r < n && arr[r] > arr[largest])
-            largest = r;
-
-        if (i != largest){
-            int temp = arr[i];
-            arr[i] = arr[largest];
-            arr[largest] = temp;
-
-            heapify(arr, largest, n);
+        @Override
+        public String toString() {
+            return "Contact{" +
+                    "id=" + id +
+                    ", name='" + name + '\'' +
+                    ", phone='" + phone + '\'' +
+                    '}';
         }
     }
 
-    public static void heapSort(int[] arr) {
+    public static class SingleLinkList<T> implements Iterable {
 
-        int n = arr.length;
+        ListItem<T> head;
+        ListItem<T> tail;
 
-        for(int i  = n / 2 - 1; i >= 0; i--)
-            heapify(arr, i , n);
+        @Override
+        public Iterator iterator() {
+            return new Iterator<T>() {
+                ListItem<T> current = head;
 
-        for (int i = n - 1; i >= 0; i--){
+                @Override
+                public boolean hasNext() {
+                    return current != null;
+                }
 
-            int temp = arr[i];
-            arr[i] = arr[0];
-            arr[0] = temp;
-
-
-            heapify(arr, 0, i);
+                @Override
+                public T next() {
+                    T data = current.data;
+                    current = current.next;
+                    return data;
+                }
+            };
         }
 
+        private static class ListItem<T> {
+
+            T data;
+            ListItem<T> next;
+        }
+
+        //Голова пустая
+        public boolean isEmpty() {
+            return head == null;
+        }
+
+        //заполнение списка
+        public void addToEnd(T item) {
+
+            //Выделение памяти для списка
+            ListItem<T> newItem = new ListItem<>();
+            newItem.data = item;
+
+            //Если, голова и хвост пустая
+            if (isEmpty()) {
+                head = newItem;
+                tail = newItem;
+            } else { //Если, не пустая то передаём элементу адрес и ставим в хвост
+                tail.next = newItem;
+                tail = newItem;
+            }
+        }
+
+        //метод разворота списка
+        public void reverse() {
+            if (!isEmpty() && head.next != null) {//Если голова не равна нулю
+                tail = head;
+                ListItem<T> current = head.next;
+                head.next = null;
+                while (current != null) {
+                    ListItem<T> next = current.next;
+                    current.next = head;
+                    head = current;
+                    current = next;
+                }
+            }
+        }
     }
 
     public static void main(String[] args) {
-        int[] arr = {1234, 4, 7, 2, 1, -3, 0, 567, 45, 90, 34,2, 234};
+        SingleLinkList<Contact> contactList = new SingleLinkList<>();
 
-        heapSort(arr);
+        contactList.addToEnd(new Contact(121, "Иванов Иван Иванович", "+7987654321"));
+        contactList.addToEnd(new Contact(122, "Иванов Сергей Иванович", "+7987654322"));
+        contactList.addToEnd(new Contact(123, "Иванов Андрей Иванович", "+7987654323"));
+        contactList.addToEnd(new Contact(124, "Иванов Тимофей Иванович", "+7987654324"));
+        contactList.addToEnd(new Contact(125, "Иванов Александр Иванович", "+7987654325"));
 
-        for (int i = 0; i < arr.length; i++)
-            System.out.print(arr[i] + " ");
+        for (Object contact : contactList) {
+            System.out.println(contact);
+        }
+        contactList.reverse();
+
+        System.out.println("-------------------------------------");
+
+        for (Object contact : contactList) {
+            System.out.println(contact);
+        }
     }
-
-
-
 
 }
